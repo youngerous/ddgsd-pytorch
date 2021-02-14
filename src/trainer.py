@@ -2,11 +2,12 @@ import glob
 import os
 import random
 import time
+from typing import *
 
 import torch
 import torch.nn as nn
-import torch.optim as optim
 import torch.nn.functional as F
+import torch.optim as optim
 import yaml
 from tensorboardX import SummaryWriter
 from tqdm import tqdm
@@ -80,7 +81,7 @@ class Trainer:
             "top_5_error": 0,
         }
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> Tuple[optim.Optimizer, Optional[optim.Optimizer]]:
         optimizer = optim.SGD(
             self.model.parameters(),
             lr=self.hparams.lr,
@@ -95,7 +96,7 @@ class Trainer:
         )
         return optimizer, scheduler
 
-    def save_checkpoint(self, epoch: int, val_loss: float, model: nn.Module) -> dict:
+    def save_checkpoint(self, epoch: int, val_loss: float, model: nn.Module) -> None:
         tqdm.write(
             f"Val loss decreased ({self.global_val_loss:.4f} → {val_loss:.4f}). Saving model ..."
         )
@@ -246,7 +247,7 @@ class Trainer:
 
         return val_loss.avg
 
-    def test(self, state_dict) -> None:
+    def test(self, state_dict) -> dict:
         test_loss = AverageMeter()
         top1 = AverageMeter()
         top5 = AverageMeter()
