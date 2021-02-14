@@ -5,14 +5,16 @@ from datetime import datetime
 import numpy as np
 import pandas as pd
 import torch
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 def fix_seed(seed: int) -> None:
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
-    torch.backends.cudnn.deterministic = True  #
-    torch.backends.cudnn.benchmark = False  #
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
     np.random.seed(seed)
     random.seed(seed)
 
@@ -33,6 +35,21 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 
+class DistillationLoss(nn.Module):
+    def __init__(self, temp: float):
+        super(DistillationLoss, self).__init__()
+        self.T = temp
+
+    def forward(self, out1, out2):
+        loss = F.kl_div(
+            F.log_softmax(out1 / self.T, dim=1),
+            F.softmax(out2 / self.T, dim=1),
+            reduction="none",
+        )
+
+        return loss
+
+
 class AverageMeter:
     def __init__(self):
         self.reset()
@@ -43,7 +60,7 @@ class AverageMeter:
         self.sum = 0
         self.count = 0
 
-    def update(self, val: float, n: int = 1):
+    def update(self, val, n=1):
         self.val = val
         self.sum += val * n
         self.count += n
@@ -84,70 +101,3 @@ class ResultWriter:
             self.hparams = pd.read_csv(self.dir)
         else:
             self.hparams = None
-
-
-class EarlyStopping:
-    """Early stops the training if validation loss doesn't improve after a given patience.
-    ref: https://github.com/Bjarten/early-stopping-pytorch
-    """
-
-    def __init__(
-        self,
-        patience: int = 7,
-        verbose: bool = False,
-        delta: float = 0,
-        path: str = "best_model.pt",
-        trace_func=print,
-    ):
-        """
-        :param patience: How long to wait after last time validation loss improved.
-                            Default: 7
-        :param verbose: If True, prints a message for each validation loss improvement.
-                            Default: False
-        :param delta: Minimum change in the monitored quantity to qualify as an improvement.
-                            Default: 0
-        :param path: Path for the checkpoint to be saved to.
-                            Default: 'checkpoint.pt'
-        :param trace_func: trace print function.
-                            Default: print
-        """
-        self.patience = patience
-        self.verbose = verbose
-        self.counter = 0
-        self.best_score = None
-        self.early_stop = False
-        self.val_loss_min = np.Inf
-        self.delta = delta
-        self.path = path
-        self.trace_func = trace_func
-
-    def __call__(self, val_loss, model):
-
-        score = -val_loss
-
-        if self.best_score is None:
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-        elif score < self.best_score + self.delta:
-            self.counter += 1
-            self.trace_func(
-                f"EarlyStopping counter: {self.counter} out of {self.patience}"
-            )
-            if self.counter >= self.patience:
-                self.early_stop = True
-        else:
-            self.best_score = score
-            self.save_checkpoint(val_loss, model)
-            self.counter = 0
-
-    def save_checkpoint(self, val_loss, model):
-        """Saves model when validation loss decrease.
-
-        TODO: if you use this class, it may collide with checkpoint saving function in trainer.
-        """
-        if self.verbose:
-            self.trace_func(
-                f"Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ..."
-            )
-        torch.save(model.state_dict(), self.path)
-        self.val_loss_min = val_loss

@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 
 from config import load_config
-from model.net import Model  # TODO: Set your model
+from model.net import *
 from trainer import Trainer
 from utils import ResultWriter, fix_seed
 
@@ -15,14 +15,17 @@ def main(hparams):
 
     resultwriter = ResultWriter(hparams.result_path)
     scaler = torch.cuda.amp.GradScaler() if hparams.amp else None
-    model = Model()  #
+
+    model = ResNet18()
+    # model = ResNet34()
+    # model = ResNet50()
 
     # training phase
     trainer = Trainer(hparams, model, scaler, resultwriter)
     best_result = trainer.fit()
 
     # testing phase
-    if hparams.test:
+    if hparams.contain_test:
         version = best_result["version"]
         state_dict = torch.load(
             glob.glob(f"checkpoints/version-{version}/best_model_*.pt")[0]
