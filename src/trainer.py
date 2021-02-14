@@ -183,7 +183,7 @@ class Trainer:
                 self.global_step += 1
                 if self.global_step % self.eval_step == 0:
                     tqdm.write(
-                        f"[Triplet Version {self.version} Epoch {epoch}] global step: {self.global_step}, train loss: {loss.item():.3f}"
+                        f"[DDGSD Version {self.version} Epoch {epoch}] global step: {self.global_step}, train loss: {loss.item():.3f}"
                     )
             else:  # baseline
                 img, label = map(lambda x: x.to(self.device), batch)
