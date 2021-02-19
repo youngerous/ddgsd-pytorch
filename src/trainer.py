@@ -236,13 +236,9 @@ class Trainer:
                 enumerate(self.val_loader), desc="val_steps", total=len(self.val_loader)
             ):
                 img, label = map(lambda x: x.to(self.device), batch)
-                if self.hparams.amp:
-                    with torch.cuda.amp.autocast():
-                        pred = self.model(img)
-                        loss = self.ce_loss(pred, label).mean()
-                else:
-                    pred = self.model(img)
-                    loss = self.ce_loss(pred, label).mean()
+                pred = self.model(img)
+                loss = self.ce_loss(pred, label).mean()
+
                 val_loss.update(loss.item())
 
         return val_loss.avg
