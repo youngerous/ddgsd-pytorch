@@ -51,5 +51,5 @@ $ sh scripts/run_ddgsd.sh
 | CIFAR-100 | ResNet18 |   30.15%    |    9.58%    | Baseline |
 | CIFAR-100 | ResNet18 | **26.60%**  |  **8.36%**  |  DDGSD   |
 
-\* Hyperparameters of this implementation follow paper settings.
+\* Hyperparameters of this implementation follow paper settings. <br>
 \* MMD Loss is replaced with MSE Loss in this implementation.
