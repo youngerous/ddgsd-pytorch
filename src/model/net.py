@@ -6,7 +6,7 @@ Reference:
 [1] Kaiming He, Xiangyu Zhang, Shaoqing Ren, Jian Sun
     Deep Residual Learning for Image Recognition. arXiv:1512.03385
 
-Ref: https://github.com/youngerous/pytorch-cifar
+Ref: https://github.com/kuangliu/pytorch-cifar
 """
 import torch
 import torch.nn as nn
