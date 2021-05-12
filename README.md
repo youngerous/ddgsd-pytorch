@@ -52,4 +52,5 @@ $ sh scripts/run_ddgsd.sh
 | CIFAR-100 | ResNet18 | **26.60%**  |  **8.36%**  |  DDGSD   |
 
 \* Hyperparameters of this implementation follow paper settings. <br>
-\* MMD Loss is replaced with MSE Loss in this implementation.
+\* MMD Loss is replaced with MSE Loss in this implementation. <br>
+\* For another differences, check [this issue](https://github.com/youngerous/ddgsd-pytorch/issues/1).
